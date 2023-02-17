@@ -1,4 +1,6 @@
-﻿using IdentityServer4.Models;
+﻿using Api.Helpers;
+using IdentityServer4;
+using IdentityServer4.Models;
 using IdentityServer4.Test;
 
 namespace IdentityServer
@@ -10,11 +12,16 @@ namespace IdentityServer
             {
                 new Client
                 {
-                    ClientId = "Movies.Client",
-                    ClientName = "Movies Client",
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    ClientSecrets = { new Secret("vfdsf&566efcn@!c_=".Sha256()) },
-                    AllowedScopes = { "Movie.API" }
+                    ClientId = IdentityConfiguration.ClientId,
+                    AllowedGrantTypes = { IdentityConfiguration.ResourceOwnerEmailAndPassword },
+                    AllowedScopes = {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityConfiguration.ClientScope
+                    },
+                    RequireConsent = false,
+                    AccessTokenLifetime = IdentityConfiguration.AccessTokenLifetime,
+                    AllowOfflineAccess = true,
+                    RequireClientSecret = false,
                 }
             };
 
@@ -23,14 +30,18 @@ namespace IdentityServer
             {
                 new ApiResource
                 {
-
+                    Name = IdentityConfiguration.ClientScope,
+                    Scopes = new List<string>
+                    {
+                        IdentityConfiguration.ClientScope
+                    }
                 }
             };
 
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
-                new ApiScope("Movie.API", "Movie API")
+                new ApiScope(IdentityConfiguration.ClientScope)
             };
 
         public static IEnumerable<IdentityResource> IdentityResources =>
@@ -38,6 +49,7 @@ namespace IdentityServer
             {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
+                new IdentityResources.Email(),
             };
 
         public static IEnumerable<TestUser> TestUsers =>
