@@ -1,12 +1,13 @@
-using IdentityServer;
+using Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.ConfigureDb(builder.Configuration);
+builder.Services.ConfigureServices();
+builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
-builder.Services.AddIdentityServer()
-    .AddInMemoryClients(Config.Clients)
-    .AddInMemoryApiScopes(Config.ApiScopes)
-    .AddDeveloperSigningCredential();
+builder.Services.ConfigureIdentityServer();
+
 
 var app = builder.Build();
 
@@ -19,6 +20,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseIdentityServer();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
