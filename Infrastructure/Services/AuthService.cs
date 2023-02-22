@@ -67,7 +67,7 @@ namespace Infrastructure.Services
                 });
 
             if (tokensResponse.IsError)
-                throw new InvalidOperationException("cannot request for tokens");
+                throw new InvalidOperationException(tokensResponse.Json.ToString());
 
             var tokens = new TokensOutgoingDto
             {
