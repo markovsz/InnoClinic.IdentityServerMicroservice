@@ -40,13 +40,19 @@ namespace Infrastructure.Services
             var clientId = identityServerConfig
                         .GetSection("ClientId")
                         .Value;
-            var scope = identityServerConfig
-                        .GetSection("Scope")
+            var scopes = identityServerConfig
+                .GetSection("Scopes");
+
+            var basicScope = scopes
+                .GetSection("Basic")
                         .Value;
+            var refreshTokenScope = scopes
+                .GetSection("RefreshToken")
+                .Value;
 
             var discoveryDocument = await client.GetDiscoveryDocumentAsync(identityServerAddress);
             var tokensResponse = await client.RequestTokenAsync(
-                new ClientCredentialsTokenRequest
+                new TokenRequest
                 {
                     Address = discoveryDocument.TokenEndpoint,
                     GrantType = grantType,
@@ -56,8 +62,10 @@ namespace Infrastructure.Services
                     Parameters =
                     {
                         { "email", incomingDto.Email },
-                        { "password", incomingDto.Password }
-                    }
+                        { "password", incomingDto.Password },
+                        { "Scope", basicScope + " " + refreshTokenScope }
+                    },
+
                 });
 
             var tokens = new TokensOutgoingDto
