@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureDb(builder.Configuration);
 builder.Services.ConfigureServices();
 builder.Services.ConfigureAuthentication(builder.Configuration);
+builder.Services.ConfigureFilters();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.ConfigureIdentityServer();
