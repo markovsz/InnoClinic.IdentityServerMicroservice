@@ -107,7 +107,35 @@ namespace Infrastructure.Services
                 throw new InvalidOperationException("cannot revoke a token");
         }
 
-        
+        public async Task<string> SignUpAsync(SignUpIncomingDto incomingDto)
+        {
+            if (!incomingDto.Password.Equals(incomingDto.ReEnteredPassword))
+                throw new InvalidOperationException("password and reEnteredPassword don't match");
+
+            var account = new Account
+            {
+                UserName = incomingDto.Email.Split('@')[0],
+                Email = incomingDto.Email,
+                NormalizedEmail = incomingDto.Email.ToLower(),
+                EmailConfirmed = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var result = await _userManager.CreateAsync(account, incomingDto.Password);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(result.Errors.AsJson());
+
+            account.CreatedBy = account.Id;
+            result = await _userManager.UpdateAsync(account);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(result.Errors.AsJson());
+
+           result = await _userManager.AddToRoleAsync(account, nameof(UserRoles.Patient));
+            if (!result.Succeeded)
+                throw new InvalidOperationException(result.Errors.AsJson());
+
+            return account.Id;
+        }
 
         public async Task<RefreshedTokensOutgoingDto> GenerateAccessTokenAsync(RefreshTokenIncomingDto incomingDto)
         {

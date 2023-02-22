@@ -7,6 +7,7 @@ namespace Application.Interfaces
     {
         Task<TokensOutgoingDto> LogInAsync(LoginIncomingDto incomingDto);
         Task LogOutAsync(RefreshTokenIncomingDto incomingDto);
+        Task<string> SignUpAsync(SignUpIncomingDto incomingDto);
         Task<RefreshedTokensOutgoingDto> GenerateAccessTokenAsync(RefreshTokenIncomingDto incomingDto);
     }
 }
