@@ -14,8 +14,7 @@ namespace Api.Extensions
     {
         public static void ConfigureDb(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<AuthDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("dbConnection"),
-                b => b.MigrationsAssembly("Infrastructure")));
+            services.AddDbContext<AuthDbContext>(options => options.ConfigureDb(configuration));
         }
 
         public static void ConfigureServices(this IServiceCollection services)
