@@ -2,6 +2,7 @@
 using Application.DTOs.Outgoing;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using IdentityModel.Client;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +12,6 @@ namespace Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
-        private SignInManager<Account> _signInManager;
         private UserManager<Account> _userManager;
         private IHttpClientFactory _httpClientFactory;
         private IConfiguration _configuration;
@@ -34,17 +34,17 @@ namespace Infrastructure.Services
                 .Value;
 
             var grantType = identityServerConfig
-                        .GetSection("GrantType")
-                        .Value;
+                .GetSection("GrantType")
+                .Value;
             var clientId = identityServerConfig
-                        .GetSection("ClientId")
-                        .Value;
+                .GetSection("ClientId")
+                .Value;
             var scopes = identityServerConfig
                 .GetSection("Scopes");
 
             var basicScope = scopes
                 .GetSection("Basic")
-                        .Value;
+                .Value;
             var refreshTokenScope = scopes
                 .GetSection("RefreshToken")
                 .Value;
@@ -56,7 +56,6 @@ namespace Infrastructure.Services
                     Address = discoveryDocument.TokenEndpoint,
                     GrantType = grantType,
                     ClientId = clientId,
-                    Scope = scope,
 
                     Parameters =
                     {
@@ -79,30 +78,71 @@ namespace Infrastructure.Services
             return tokens;
         }
 
-        [Authorize]
-        public async Task LogOutAsync()
+        public async Task LogOutAsync(RefreshTokenIncomingDto incomingDto)
         {
-            await _signInManager.SignOutAsync();
-            //var account = await _userManager.FindByNameAsync(incomingDto.UserName);
-            //await _signInManager.SignOutAsync(account);
-            //
-            //var client = _httpClientFactory.CreateClient();
-            //
-            //var discoveryDocument = await client.GetDiscoveryDocumentAsync("https://localhost:7239");
-            //var tokensResponse = await client.RequestClientCredentialsTokenAsync(
-            //    new ClientCredentialsTokenRequest
-            //    {
-            //        Address = discoveryDocument.TokenEndpoint,
-            //
-            //        ClientId = "Profiles.Client",
-            //        ClientSecret = "vfdsf&566efcn@!c_=",
-            //
-            //        Scope = "ProfilesAPI"
-            //    });
-            //
-            //
-            //
-            //return tokens;
+            var client = _httpClientFactory.CreateClient();
+
+            var identityServerConfig = _configuration
+                .GetSection("IdentityServer");
+
+            var identityServerAddress = identityServerConfig
+                .GetSection("Address")
+                .Value;
+
+            var clientId = identityServerConfig
+                .GetSection("ClientId")
+                .Value;
+
+            var discoveryDocument = await client.GetDiscoveryDocumentAsync(identityServerAddress);
+            var revokedTokenResponse = await client.RevokeTokenAsync(
+                new TokenRevocationRequest
+                {
+                    Address = discoveryDocument.RevocationEndpoint,
+                    ClientId = clientId,
+                     
+                    Token = incomingDto.RefreshToken
+                });
+
+            if (revokedTokenResponse.IsError)
+                throw new InvalidOperationException("cannot revoke a token");
+        }
+
+        
+
+        public async Task<RefreshedTokensOutgoingDto> GenerateAccessTokenAsync(RefreshTokenIncomingDto incomingDto)
+        {
+            var client = _httpClientFactory.CreateClient();
+
+            var identityServerConfig = _configuration
+                .GetSection("IdentityServer");
+
+            var identityServerAddress = identityServerConfig
+                .GetSection("Address")
+                .Value;
+
+            var clientId = identityServerConfig
+                .GetSection("ClientId")
+                .Value;
+
+            var discoveryDocument = await client.GetDiscoveryDocumentAsync(identityServerAddress);
+            var refreshTokensResponse = await client.RequestRefreshTokenAsync(
+                new RefreshTokenRequest
+                {
+                    Address = discoveryDocument.TokenEndpoint,
+                    ClientId = clientId,
+                    RefreshToken = incomingDto.RefreshToken,
+                });
+
+            if (refreshTokensResponse.IsError)
+                throw new InvalidOperationException("cannot refresh a token");
+
+            var refreshedTokens = new RefreshedTokensOutgoingDto
+            {
+                AccessToken = refreshTokensResponse.AccessToken,
+                RefreshToken = refreshTokensResponse.RefreshToken
+            };
+
+            return refreshedTokens;
         }
     }
 }

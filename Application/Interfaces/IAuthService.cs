@@ -6,6 +6,7 @@ namespace Application.Interfaces
     public interface IAuthService
     {
         Task<TokensOutgoingDto> LogInAsync(LoginIncomingDto incomingDto);
-        Task LogOutAsync();
+        Task LogOutAsync(RefreshTokenIncomingDto incomingDto);
+        Task<RefreshedTokensOutgoingDto> GenerateAccessTokenAsync(RefreshTokenIncomingDto incomingDto);
     }
 }
