@@ -16,8 +16,7 @@ namespace Infrastructure.Services
         private IHttpClientFactory _httpClientFactory;
         private IConfiguration _configuration;
 
-        public AuthService(UserManager<Account> userManager, SignInManager<Account> signInManager, IHttpClientFactory httpClientFactory, IConfiguration configuration) {
-            _signInManager = signInManager;
+        public AuthService(UserManager<Account> userManager, IHttpClientFactory httpClientFactory, IConfiguration configuration) {
             _userManager = userManager;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
