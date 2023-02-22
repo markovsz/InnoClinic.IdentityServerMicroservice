@@ -43,6 +43,9 @@ namespace Api.Extensions
             var identityServerConfig = configuration
                         .GetSection("IdentityServer");
 
+            var scopes = identityServerConfig
+                        .GetSection("Scopes");
+
             services.AddAuthentication(config =>
             config.DefaultScheme = JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, config =>
@@ -56,8 +59,7 @@ namespace Api.Extensions
                     ValidIssuer = identityServerConfig
                         .GetSection("Address").Value,
                     ValidateIssuer = true,
-                    ValidAudience = identityServerConfig
-                        .GetSection("Scope").Value,
+                    ValidAudience = scopes.GetSection("Basic").Value,
 
                     ValidateAudience = true
                 };
