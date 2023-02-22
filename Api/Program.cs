@@ -1,4 +1,5 @@
 using Api.Extensions;
+using Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureDb(builder.Configuration);
@@ -19,6 +20,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ExceptionsHandler>();
 
 app.UseIdentityServer();
 app.UseAuthentication();
