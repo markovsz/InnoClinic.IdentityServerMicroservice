@@ -7,7 +7,7 @@ builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.ConfigureFilters();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
-builder.Services.ConfigureIdentityServer();
+builder.Services.ConfigureIdentityServer(builder.Configuration);
 
 
 var app = builder.Build();

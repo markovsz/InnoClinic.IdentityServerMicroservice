@@ -1,11 +1,11 @@
-﻿using Application.Interfaces;
+﻿using Api.FilterAttributes;
+using Application.Interfaces;
 using Domain.Entities;
 using IdentityServer;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Extensions
@@ -22,12 +22,16 @@ namespace Api.Extensions
             services.AddScoped<IAuthService, AuthService>();
         }
 
-        public static void ConfigureIdentityServer(this IServiceCollection services)
+        public static void ConfigureIdentityServer(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentity<Account, IdentityRole>()
                 .AddEntityFrameworkStores<AuthDbContext>();
 
             services.AddIdentityServer()
+                .AddOperationalStore(config => {
+                    config.ConfigureDbContext =
+                        builder => builder.ConfigureDb(configuration);
+                })
                 .AddAspNetIdentity<Account>()
                 .AddInMemoryClients(Config.Clients)
                 .AddInMemoryApiScopes(Config.ApiScopes)
