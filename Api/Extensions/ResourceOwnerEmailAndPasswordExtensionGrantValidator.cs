@@ -28,8 +28,8 @@ namespace Api.Extensions
             if(email is not null && password is not null)
             {
                 var account = await _userManager.FindByEmailAsync(email);
-                var result = await _signInManager.PasswordSignInAsync(account, password, false, false);
-                if (result.Succeeded)
+                var isValid = await _signInManager.UserManager.CheckPasswordAsync(account, password);
+                if (isValid)
                 {
                     context.Result = new GrantValidationResult(account.Id, AuthenticationMethods.Password);
                     return;
