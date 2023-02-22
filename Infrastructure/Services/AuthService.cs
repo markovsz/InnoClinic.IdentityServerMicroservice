@@ -3,7 +3,7 @@ using Application.DTOs.Outgoing;
 using Application.Interfaces;
 using Domain.Entities;
 using IdentityModel.Client;
-using Microsoft.AspNetCore.Authorization;
+using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
@@ -66,6 +66,9 @@ namespace Infrastructure.Services
                     },
 
                 });
+
+            if (tokensResponse.IsError)
+                throw new InvalidOperationException("cannot request for tokens");
 
             var tokens = new TokensOutgoingDto
             {
