@@ -5,10 +5,6 @@ namespace Infrastructure.Extensions
 {
     public static class IEnumerableIdentityErrorExtension
     {
-        public static string AsJson(this IEnumerable<IdentityError> identityErrors)
-        {
-            var result =  JsonConvert.SerializeObject(identityErrors);
-            return result;
-        } 
+        public static string AsJson(this IEnumerable<IdentityError> identityErrors) => JsonConvert.SerializeObject(identityErrors);
     }
 }
