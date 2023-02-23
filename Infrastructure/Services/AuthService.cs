@@ -125,8 +125,9 @@ namespace Infrastructure.Services
             if (!result.Succeeded)
                 throw new InvalidOperationException(result.Errors.AsJson());
 
-            account.CreatedBy = account.Id;
-            result = await _userManager.UpdateAsync(account);
+            var createdAccount = await _userManager.FindByIdAsync(account.Id);
+            createdAccount.CreatedBy = account.Id;
+            result = await _userManager.UpdateAsync(createdAccount);
             if (!result.Succeeded)
                 throw new InvalidOperationException(result.Errors.AsJson());
 
