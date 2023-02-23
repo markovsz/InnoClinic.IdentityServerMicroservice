@@ -24,7 +24,14 @@ namespace Api.Extensions
 
         public static void ConfigureIdentityServer(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddIdentity<Account, IdentityRole>()
+            services.AddIdentity<Account, IdentityRole>(config =>
+            {
+                config.Password.RequireDigit = true;
+                config.Password.RequireLowercase = true;
+                config.Password.RequireNonAlphanumeric = false;
+                config.Password.RequireUppercase = true;
+                config.Password.RequiredLength = 6;
+            })
                 .AddEntityFrameworkStores<AuthDbContext>();
 
             services.AddIdentityServer()
