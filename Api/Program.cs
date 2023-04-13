@@ -3,6 +3,7 @@ using Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureDb(builder.Configuration);
+builder.Services.ConfigurePasswordGenerator(builder.Configuration);
 builder.Services.ConfigureServices();
 builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.ConfigureFilters();

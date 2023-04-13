@@ -7,6 +7,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using PasswordGenerator;
 
 namespace Api.Extensions
 {
@@ -20,6 +21,8 @@ namespace Api.Extensions
         public static void ConfigureServices(this IServiceCollection services)
         {
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAccountsService, AccountsService>();
+            services.AddScoped<IEmailService, EmailService>();
         }
 
         public static void ConfigureIdentityServer(this IServiceCollection services, IConfiguration configuration)
@@ -32,7 +35,8 @@ namespace Api.Extensions
                 config.Password.RequireUppercase = true;
                 config.Password.RequiredLength = 6;
             })
-                .AddEntityFrameworkStores<AuthDbContext>();
+                .AddEntityFrameworkStores<AuthDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddIdentityServer()
                 .AddOperationalStore(config => {
@@ -80,6 +84,18 @@ namespace Api.Extensions
         public static void ConfigureFilters(this IServiceCollection services)
         {
             services.AddScoped<ExtractAccountIdAttribute>();
+        }
+
+        public static void ConfigurePasswordGenerator(this IServiceCollection services, IConfiguration configuration)
+        {
+            var includeNumeric = Boolean.Parse(configuration.GetSection("PasswordGenerator:IncludeNumeric").Value);
+            var includeLowercase = Boolean.Parse(configuration.GetSection("PasswordGenerator:IncludeLowercase").Value);
+            var includeUppercase = Boolean.Parse(configuration.GetSection("PasswordGenerator:IncludeUppercase").Value);
+            var includeSpecial = Boolean.Parse(configuration.GetSection("PasswordGenerator:IncludeSpecial").Value);
+            var length = Int32.Parse(configuration.GetSection("PasswordGenerator:Length").Value);
+            var settings = new PasswordSettings(includeLowercase, includeUppercase, includeNumeric, includeSpecial, length, 1, false);
+            services.AddSingleton(settings);
+            services.AddSingleton<IPassword, Password>();
         }
     }
 }
