@@ -59,11 +59,12 @@ namespace Api.Controllers
             return Ok();
         }
 
-            var signUpResult = new {
-                AccountId = accountId,
-                Tokens = tokens
-            };
-            return Created("", signUpResult);
+        [AllowAnonymous]
+        [HttpPost("email/confirm")]
+        public async Task<IActionResult> ConfirmEmailAsync(string email, string token)
+        {
+            await _authService.ConfirmEmailAsync(email, token);
+            return Ok();
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
