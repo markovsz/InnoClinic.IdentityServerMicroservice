@@ -16,7 +16,7 @@ namespace Infrastructure.Configurations
                 new IdentityUserRole<string>
                 {
                     UserId = "da5efb83-e640-473e-8cc2-59e1a49b1741",
-                    RoleId = "9c8ff47f-9018-4b0b-bbf4-ad7de2e67fbb"
+                    RoleId = "c317b51c-07c6-4bb7-a90e-f037c4e91141"
                 }
             );
         }
