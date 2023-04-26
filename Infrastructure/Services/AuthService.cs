@@ -8,6 +8,7 @@ using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using PasswordGenerator;
+using System.Net;
 
 namespace Infrastructure.Services
 {
@@ -119,8 +120,9 @@ namespace Infrastructure.Services
             var account = await _accountsService.CreateAccountAsync(incomingDto, role);
             var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(account);
             var returnUrl = _configuration.GetSection("IdentityServer:ReturnUrl").Value;
-            var confirmationPath = returnUrl + $"?email={account.Email}&token={emailToken}";
-            _emailService.SendEmailConfirmation(confirmationPath, account.Email);
+            string encodedEmailToken = WebUtility.UrlEncode(emailToken);
+            var confirmationPath = returnUrl + $"?email={account.Email}&token={encodedEmailToken}";
+            _emailService.SendEmailConfirmation(account.Email, confirmationPath);
         }
 
         public async Task SignUpWithoutPasswordAsync(SignUpWithoutPasswordIncomingDto incomingDto, UserRoles role)
