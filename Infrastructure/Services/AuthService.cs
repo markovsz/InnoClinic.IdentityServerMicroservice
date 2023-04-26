@@ -3,6 +3,7 @@ using Application.DTOs.Outgoing;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 using IdentityModel.Client;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -139,7 +140,7 @@ namespace Infrastructure.Services
         {
             var account = await _userManager.FindByEmailAsync(email);
             if (account is null)
-                throw new InvalidOperationException("account doesnt exist");
+                throw new IncorrectDataException("account doesnt exist");
             await _userManager.IsEmailConfirmedAsync(account);
             var result = await _userManager.ConfirmEmailAsync(account, confirmationToken);
             if (!result.Succeeded)

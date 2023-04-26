@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
 using PasswordGenerator;
@@ -20,11 +21,11 @@ namespace Infrastructure.Services
         public async Task<Account> CreateAccountAsync(AccountIncomingDto incomingDto, UserRoles role)
         {
             if (!incomingDto.Password.Equals(incomingDto.ReEnteredPassword))
-                throw new InvalidOperationException("password and reEnteredPassword don't match");
+                throw new IncorrectDataException("password and reEnteredPassword don't match");
 
             var accountByEmail = await _userManager.FindByEmailAsync(incomingDto.Email);
             if (accountByEmail is not null)
-                throw new InvalidOperationException("account with such an email already exists");
+                throw new IncorrectDataException("account with such an email already exists");
 
             var account = new Account
             {

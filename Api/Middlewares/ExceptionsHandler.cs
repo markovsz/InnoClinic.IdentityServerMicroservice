@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Domain.Exceptions;
+using Newtonsoft.Json;
 using System.Net;
 
 namespace Api.Middlewares
@@ -18,9 +19,9 @@ namespace Api.Middlewares
             {
                 await _next.Invoke(context);
             }
-            catch (InvalidOperationException ex)
+            catch (IncorrectDataException ex)
             {
-                await HandleExceptionAsync(context, ex.Message, HttpStatusCode.InternalServerError);
+                await HandleExceptionAsync(context, ex.Message, HttpStatusCode.BadRequest);
             }
             catch (Exception ex)
             {
