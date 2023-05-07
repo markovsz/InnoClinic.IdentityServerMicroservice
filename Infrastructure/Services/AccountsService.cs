@@ -29,6 +29,7 @@ namespace Infrastructure.Services
 
             var account = new Account
             {
+                PhotoUrl = incomingDto.PhotoUrl,
                 UserName = incomingDto.Email.Split('@')[0],
                 Email = incomingDto.Email,
                 NormalizedEmail = incomingDto.Email.ToLower(),

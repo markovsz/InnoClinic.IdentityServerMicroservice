@@ -118,6 +118,8 @@ namespace Infrastructure.Services
 
         public async Task SignUpAsync(SignUpIncomingDto incomingDto, UserRoles role)
         {
+            if (role != UserRoles.Patient)
+                throw new IncorrectDataException("incorrect role");
             var account = await _accountsService.CreateAccountAsync(incomingDto, role);
             var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(account);
             var returnUrl = _configuration.GetSection("IdentityServer:ReturnUrl").Value;
@@ -126,14 +128,20 @@ namespace Infrastructure.Services
             _emailService.SendEmailConfirmation(account.Email, confirmationPath);
         }
 
-        public async Task SignUpWithoutPasswordAsync(SignUpWithoutPasswordIncomingDto incomingDto, UserRoles role)
+        public async Task<SignUpOutgoingDto> SignUpWithoutPasswordAsync(SignUpWithoutPasswordIncomingDto incomingDto, UserRoles role)
         {
             SignUpIncomingDto signUpDto = new SignUpIncomingDto();
             signUpDto.Email = incomingDto.Email;
             signUpDto.Password = _passwordGenerator.Next();
             signUpDto.ReEnteredPassword = signUpDto.Password;
+            signUpDto.PhotoUrl = incomingDto.PhotoUrl;
             var account = await _accountsService.CreateAccountAsync(signUpDto, role);
             _emailService.SendCredentials(account.Email, signUpDto.Password);
+            var outgoingDto = new SignUpOutgoingDto()
+            {
+                AccountId = account.Id,
+            };
+            return outgoingDto;
         }
 
         public async Task ConfirmEmailAsync(string email, string confirmationToken)
