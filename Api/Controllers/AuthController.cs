@@ -48,16 +48,16 @@ namespace Api.Controllers
         [HttpPost("doctor/signup")]
         public async Task<IActionResult> SignUpDoctorAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
         {
-            await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Doctor);
-            return Ok();
+            var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Doctor);
+            return Ok(outgoingDto);
         }
 
         [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("receptionist/signup")]
         public async Task<IActionResult> SignUpReceptionistAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
         {
-            await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Receptionist);
-            return Ok();
+            var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Receptionist);
+            return Ok(outgoingDto);
         }
 
         [AllowAnonymous]
