@@ -45,7 +45,15 @@ namespace Api.Controllers
         }
 
         [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("doctor/signup")]
+        [HttpPost("admin/patient/signup")]
+        public async Task<IActionResult> SignUpPatientAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
+        {
+            var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Patient);
+            return Ok(outgoingDto);
+        }
+
+        [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("admin/doctor/signup")]
         public async Task<IActionResult> SignUpDoctorAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
         {
             var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Doctor);
@@ -53,7 +61,7 @@ namespace Api.Controllers
         }
 
         [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("receptionist/signup")]
+        [HttpPost("admin/receptionist/signup")]
         public async Task<IActionResult> SignUpReceptionistAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
         {
             var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Receptionist);
