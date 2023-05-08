@@ -19,6 +19,7 @@ namespace Infrastructure.Configurations
                 PhoneNumber = "1234567890",
                 EmailConfirmed = false,
                 PhoneNumberConfirmed = false,
+                PhotoUrl = "/api/Documents/Photos/default.png",
                 SecurityStamp = "1234567890"
             };
             var passHash = new PasswordHasher<Account>();

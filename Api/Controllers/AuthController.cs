@@ -1,6 +1,7 @@
 ﻿using Api.FilterAttributes;
 using Application.DTOs.Incoming;
 using Application.Interfaces;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace Api.Controllers
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LogInAsync(LoginIncomingDto incomingDto)
         {
@@ -34,17 +36,44 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        [HttpPost("signup")]
-        public async Task<IActionResult> SignUpAsync([FromBody] SignUpIncomingDto incomingDto)
+        [AllowAnonymous]
+        [HttpPost("patient/signup")]
+        public async Task<IActionResult> SignUpPatientAsync([FromBody] SignUpIncomingDto incomingDto)
         {
-            var accountId = await _authService.SignUpAsync(incomingDto);
-            var tokens = await _authService.LogInAsync(new LoginIncomingDto { Email = incomingDto.Email, Password = incomingDto.Password });
+            await _authService.SignUpAsync(incomingDto, UserRoles.Patient);
+            return Ok();
+        }
 
-            var signUpResult = new {
-                AccountId = accountId,
-                Tokens = tokens
-            };
-            return Created("", signUpResult);
+        [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("admin/patient/signup")]
+        public async Task<IActionResult> SignUpPatientAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
+        {
+            var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Patient);
+            return Ok(outgoingDto);
+        }
+
+        [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("admin/doctor/signup")]
+        public async Task<IActionResult> SignUpDoctorAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
+        {
+            var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Doctor);
+            return Ok(outgoingDto);
+        }
+
+        [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("admin/receptionist/signup")]
+        public async Task<IActionResult> SignUpReceptionistAsync([FromBody] SignUpWithoutPasswordIncomingDto incomingDto)
+        {
+            var outgoingDto = await _authService.SignUpWithoutPasswordAsync(incomingDto, UserRoles.Receptionist);
+            return Ok(outgoingDto);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("email/confirm")]
+        public async Task<IActionResult> ConfirmEmailAsync(string email, string token)
+        {
+            await _authService.ConfirmEmailAsync(email, token);
+            return Ok();
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

@@ -3,21 +3,30 @@ using Application.DTOs.Outgoing;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 using IdentityModel.Client;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using PasswordGenerator;
+using System.Net;
 
 namespace Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
         private UserManager<Account> _userManager;
+        private IAccountsService _accountsService;
+        private IEmailService _emailService;
+        private IPassword _passwordGenerator;
         private IHttpClientFactory _httpClientFactory;
         private IConfiguration _configuration;
 
-        public AuthService(UserManager<Account> userManager, IHttpClientFactory httpClientFactory, IConfiguration configuration) {
+        public AuthService(UserManager<Account> userManager, IAccountsService accountsService, IEmailService emailService, IPassword passwordGenerator, IHttpClientFactory httpClientFactory, IConfiguration configuration) {
             _userManager = userManager;
+            _accountsService = accountsService;
+            _emailService = emailService;
+            _passwordGenerator = passwordGenerator;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
         }
@@ -56,7 +65,7 @@ namespace Infrastructure.Services
                     Address = discoveryDocument.TokenEndpoint,
                     GrantType = grantType,
                     ClientId = clientId,
-
+                    
                     Parameters =
                     {
                         { "email", incomingDto.Email },
@@ -107,35 +116,43 @@ namespace Infrastructure.Services
                 throw new InvalidOperationException("cannot revoke a token");
         }
 
-        public async Task<string> SignUpAsync(SignUpIncomingDto incomingDto)
+        public async Task SignUpAsync(SignUpIncomingDto incomingDto, UserRoles role)
         {
-            if (!incomingDto.Password.Equals(incomingDto.ReEnteredPassword))
-                throw new InvalidOperationException("password and reEnteredPassword don't match");
+            if (role != UserRoles.Patient)
+                throw new IncorrectDataException("incorrect role");
+            var account = await _accountsService.CreateAccountAsync(incomingDto, role);
+            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(account);
+            var returnUrl = _configuration.GetSection("IdentityServer:ReturnUrl").Value;
+            string encodedEmailToken = WebUtility.UrlEncode(emailToken);
+            var confirmationPath = returnUrl + $"?email={account.Email}&token={encodedEmailToken}";
+            _emailService.SendEmailConfirmation(account.Email, confirmationPath);
+        }
 
-            var account = new Account
+        public async Task<SignUpOutgoingDto> SignUpWithoutPasswordAsync(SignUpWithoutPasswordIncomingDto incomingDto, UserRoles role)
+        {
+            SignUpIncomingDto signUpDto = new SignUpIncomingDto();
+            signUpDto.Email = incomingDto.Email;
+            signUpDto.Password = _passwordGenerator.Next();
+            signUpDto.ReEnteredPassword = signUpDto.Password;
+            signUpDto.PhotoUrl = incomingDto.PhotoUrl;
+            var account = await _accountsService.CreateAccountAsync(signUpDto, role);
+            _emailService.SendCredentials(account.Email, signUpDto.Password);
+            var outgoingDto = new SignUpOutgoingDto()
             {
-                UserName = incomingDto.Email.Split('@')[0],
-                Email = incomingDto.Email,
-                NormalizedEmail = incomingDto.Email.ToLower(),
-                EmailConfirmed = false,
-                CreatedAt = DateTime.UtcNow
+                AccountId = account.Id,
             };
+            return outgoingDto;
+        }
 
-            var result = await _userManager.CreateAsync(account, incomingDto.Password);
+        public async Task ConfirmEmailAsync(string email, string confirmationToken)
+        {
+            var account = await _userManager.FindByEmailAsync(email);
+            if (account is null)
+                throw new IncorrectDataException("account doesnt exist");
+            await _userManager.IsEmailConfirmedAsync(account);
+            var result = await _userManager.ConfirmEmailAsync(account, confirmationToken);
             if (!result.Succeeded)
                 throw new InvalidOperationException(result.Errors.AsJson());
-
-            var createdAccount = await _userManager.FindByIdAsync(account.Id);
-            createdAccount.CreatedBy = account.Id;
-            result = await _userManager.UpdateAsync(createdAccount);
-            if (!result.Succeeded)
-                throw new InvalidOperationException(result.Errors.AsJson());
-
-           result = await _userManager.AddToRoleAsync(account, nameof(UserRoles.Patient));
-            if (!result.Succeeded)
-                throw new InvalidOperationException(result.Errors.AsJson());
-
-            return account.Id;
         }
 
         public async Task<RefreshedTokensOutgoingDto> GenerateAccessTokenAsync(RefreshTokenIncomingDto incomingDto)
