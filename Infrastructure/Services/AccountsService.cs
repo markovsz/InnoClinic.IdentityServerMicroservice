@@ -53,5 +53,15 @@ namespace Infrastructure.Services
 
             return account;
         }
+
+        public async Task ChangePhotoUrl(string accountId, string photoUrl)
+        {
+            var account = await _userManager.FindByIdAsync(accountId);
+            if (account is not null)
+                throw new IncorrectDataException("account with such user doen't exist");
+
+            account.PhotoUrl = photoUrl;
+            await _userManager.UpdateAsync(account);
+        }
     }
 }
