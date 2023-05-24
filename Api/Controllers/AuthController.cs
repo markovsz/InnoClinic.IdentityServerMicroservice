@@ -13,10 +13,12 @@ namespace Api.Controllers
     public class AuthController : ControllerBase
     {
         private IAuthService _authService;
+        private IAccountsService _accountsService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IAccountsService accountsService)
         {
             _authService = authService;
+            _accountsService = accountsService;
         }
 
         [AllowAnonymous]
@@ -82,6 +84,23 @@ namespace Api.Controllers
         {
             var accessToken = await _authService.GenerateAccessTokenAsync(incomingDto);
             return Ok(accessToken);
+        }
+
+        [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("admin/account/{accountId}/photo")]
+        public async Task<IActionResult> ChangePhotoUrlByAdminAsync(string accountId, string photoUrl)
+        {
+            await _accountsService.ChangePhotoUrl(accountId, photoUrl);
+            return NoContent();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ServiceFilter(typeof(ExtractAccountIdAttribute))]
+        [HttpPost("photo")]
+        public async Task<IActionResult> ChangePhotoUrlAsync(string accountId, string photoUrl)
+        {
+            await _accountsService.ChangePhotoUrl(accountId, photoUrl);
+            return NoContent();
         }
     }
 }
