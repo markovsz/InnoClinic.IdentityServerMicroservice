@@ -1,11 +1,11 @@
-﻿using Application.DTOs.Incoming;
-using Application.DTOs.Outgoing;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
 using IdentityModel.Client;
 using Infrastructure.Extensions;
+using InnoClinic.SharedModels.DTOs.Identity.Incoming;
+using InnoClinic.SharedModels.DTOs.Identity.Outgoing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using PasswordGenerator;

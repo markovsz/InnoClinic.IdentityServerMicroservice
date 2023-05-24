@@ -1,11 +1,10 @@
-﻿using Application.DTOs.Incoming;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
 using Infrastructure.Extensions;
+using InnoClinic.SharedModels.DTOs.Identity.Incoming;
 using Microsoft.AspNetCore.Identity;
-using PasswordGenerator;
 
 namespace Infrastructure.Services
 {

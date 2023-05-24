@@ -1,6 +1,6 @@
-﻿using Application.DTOs.Incoming;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Enums;
+using InnoClinic.SharedModels.DTOs.Identity.Incoming;
 
 namespace Application.Interfaces
 {

@@ -1,7 +1,7 @@
 ﻿using Api.FilterAttributes;
-using Application.DTOs.Incoming;
 using Application.Interfaces;
 using Domain.Enums;
+using InnoClinic.SharedModels.DTOs.Identity.Incoming;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
