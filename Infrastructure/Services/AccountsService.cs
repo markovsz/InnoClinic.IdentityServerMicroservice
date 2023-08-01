@@ -4,6 +4,7 @@ using Domain.Enums;
 using Domain.Exceptions;
 using Infrastructure.Extensions;
 using InnoClinic.SharedModels.DTOs.Identity.Incoming;
+using InnoClinic.SharedModels.DTOs.Identity.Outgoing;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Services
@@ -51,6 +52,13 @@ namespace Infrastructure.Services
                 throw new InvalidOperationException(result.Errors.AsJson());
 
             return account;
+        }
+
+        public async Task<AccountOutgoingDto> GetAccountAsync(string accountId)
+        {
+            var account = await _userManager.FindByIdAsync(accountId);
+            var accountToReturn = new AccountOutgoingDto() { PhotoUrl = account.PhotoUrl };
+            return accountToReturn;
         }
 
         public async Task ChangePhotoUrl(string accountId, string photoUrl)

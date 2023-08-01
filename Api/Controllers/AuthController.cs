@@ -102,5 +102,22 @@ namespace Api.Controllers
             await _accountsService.ChangePhotoUrl(accountId, photoUrl);
             return NoContent();
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [ServiceFilter(typeof(ExtractAccountIdAttribute))]
+        [HttpGet("account")]
+        public async Task<IActionResult> GetAccountAsync(string? accountId)
+        {
+            var account = await _accountsService.GetAccountAsync(accountId);
+            return Ok(account);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("account/{accountId}/info")]
+        public async Task<IActionResult> GetAccountByAdminAsync(string accountId)
+        {
+            var account = await _accountsService.GetAccountAsync(accountId);
+            return Ok(account);
+        }
     }
 }
