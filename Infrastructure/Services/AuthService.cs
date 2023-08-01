@@ -146,6 +146,7 @@ namespace Infrastructure.Services
 
         public async Task ConfirmEmailAsync(string email, string confirmationToken)
         {
+            confirmationToken = confirmationToken.Replace(' ', '+');
             var account = await _userManager.FindByEmailAsync(email);
             if (account is null)
                 throw new IncorrectDataException("account doesnt exist");
