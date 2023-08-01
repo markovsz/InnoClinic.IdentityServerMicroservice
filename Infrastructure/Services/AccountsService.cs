@@ -64,7 +64,7 @@ namespace Infrastructure.Services
         public async Task ChangePhotoUrl(string accountId, string photoUrl)
         {
             var account = await _userManager.FindByIdAsync(accountId);
-            if (account is not null)
+            if (account is null)
                 throw new IncorrectDataException("account with such user doen't exist");
 
             account.PhotoUrl = photoUrl;

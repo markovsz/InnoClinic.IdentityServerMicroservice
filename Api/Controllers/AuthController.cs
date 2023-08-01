@@ -88,7 +88,7 @@ namespace Api.Controllers
 
         [Authorize(Roles = nameof(UserRoles.Receptionist), AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("admin/account/{accountId}/photo")]
-        public async Task<IActionResult> ChangePhotoUrlByAdminAsync(string accountId, string photoUrl)
+        public async Task<IActionResult> ChangePhotoUrlByAdminAsync(string accountId, [FromBody] string photoUrl)
         {
             await _accountsService.ChangePhotoUrl(accountId, photoUrl);
             return NoContent();
@@ -97,7 +97,7 @@ namespace Api.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [ServiceFilter(typeof(ExtractAccountIdAttribute))]
         [HttpPost("photo")]
-        public async Task<IActionResult> ChangePhotoUrlAsync(string accountId, string photoUrl)
+        public async Task<IActionResult> ChangePhotoUrlAsync(string? accountId, [FromBody] string photoUrl)
         {
             await _accountsService.ChangePhotoUrl(accountId, photoUrl);
             return NoContent();
